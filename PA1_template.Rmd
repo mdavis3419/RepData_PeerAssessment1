@@ -89,6 +89,8 @@ In addition to understanding the shape of this data, we should take a look at th
   medianStepsPerDayExcludeNulls
 ```
 
+### What is the average daily activity pattern?
+
 Now that we have a solid understanding of what typical daily walking habits of this individual were, let's take a look at how they walked throughout the day.
 
 We are going to look at the mean number of steps they took durring the individual 5 minute intervals throughout the day.
@@ -104,7 +106,21 @@ Now we are going to plot these averages to see how activity changes throughout t
   axis(1,at=seq(0,24, by=6),las=2)
 ```
 
-We can see that some time between 8 and 9 AM there is a spike in the average number of steps taken. In order to find out
+We can see that some time between 8 and 9 AM there is a spike in the average number of steps taken. In order to find out exactly what time this is we can sort all of times throughtout the day from highest average step count to lowest, and take the first value.  
+
+```{r}
+  peakWalkingTime <- function(){
+    maxMeanStepsThroughoutDay <- names(sort(meanStepsThroughoutDay, decreasing = TRUE)[1])
+    textTime<-names(meanStepsThroughoutDay[meanStepsThroughoutDay = maxMeanStepsThroughoutDay])
+    paste(substr(textTime, 1, nchar(textTime)-2), substr(textTime,nchar(textTime[1])-1,nchar(textTime[1])), sep = ":")
+  }
+```
+  
+This tells us that the highest average step count occurs at `r peakWalkingTime()`.
+
+### Imputing missing values
+
+
   
 ## 
 [1]: https://github.com/mdavis3419/RepData_PeerAssessment1 "my fork"
