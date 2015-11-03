@@ -60,7 +60,52 @@ Now that we have all of our basic information, let's look at the first problem t
 
 ### What is mean total number of steps taken per day?
 
+We are going to use the non-null dataset for this analysis so that we can get an understanding of the data we have records for.
 
+We are going to approach this problem in a few steps.
+
+First we are going to find the total number of steps per day.
+
+```{r}
+  stepsPerDay <- tapply(nonNullActivityLog$steps, nonNullActivityLog$date, sum)
+  stepsPerDay
+```
+
+As you can see there are null dates in stepsPerDay. This is because the dataset was made dense to include days durring the activity months that we have no data for.
+  
+We can now create a histogram to show us the distribution of steps per day. While a look at the distribution at 5000 step buckets is good a better understanding of the shape of the data can be gained from a 2000 step bucket view.
+  
+```{r}
+  buckets <- c(0,2000,4000,6000,8000,10000,12000,14000,16000,18000,20000,22000)
+  histOfStepsPerDay <- hist(stepsPerDay, main="Histogram of Total Steps Per Day", xlab="2000 Step Buckets", ylab ="Frequency", breaks=buckets)
+```
+
+In addition to understanding the shape of this data, we should take a look at the mean and median of the data.
+
+```{r}
+  meanStepsPerDayExcludeNulls <- mean(stepsPerDay,na.rm = TRUE)
+  meanStepsPerDayExcludeNulls
+  medianStepsPerDayExcludeNulls <- median(stepsPerDay,na.rm = TRUE)
+  medianStepsPerDayExcludeNulls
+```
+
+Now that we have a solid understanding of what typical daily walking habits of this individual were, let's take a look at how they walked throughout the day.
+
+We are going to look at the mean number of steps they took durring the individual 5 minute intervals throughout the day.
+
+```{r}
+  meanStepsThroughoutDay <- tapply(nonNullActivityLog$steps, nonNullActivityLog$interval, mean)
+  head(meanStepsThroughoutDay)
+```
+
+Now we are going to plot these averages to see how activity changes throughout the day.
+```{r}
+  plot(strtoi(names(meanStepsThroughoutDay))/100,meanStepsThroughoutDay, type="l", main = "Average Steps Taken Durring 5 Minute Intervals", xlab="Time of Day (24h)",ylab="Steps (#)", xaxt="n" )
+  axis(1,at=seq(0,24, by=6),las=2)
+```
+
+We can see that some time between 8 and 9 AM there is a spike in the average number of steps taken. In order to find out
+  
 ## 
 [1]: https://github.com/mdavis3419/RepData_PeerAssessment1 "my fork"
 [2]: https://github.com/rdpeng/RepData_PeerAssessment1 "master GitHub repository"
