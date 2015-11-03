@@ -61,19 +61,46 @@ img {
 
 
 
-<div id="test" class="section level1">
-<h1>Test</h1>
+<div id="reproducible-research" class="section level1">
+<h1>Reproducible Research</h1>
+<hr />
+<p>Project1<br />11/14/2015<br />mdavis3419</p>
+<hr />
+<p>We are going to be examining what the walking pattern of an individual was over the course of October and November in 2012. We have data in 5 minute intervals recording the number of steps taken durring that period of time.</p>
+<p>In order to work with this data we can move to the folder we want to work in.</p>
+<pre><code>setwd(&quot;&lt;your desired directory&gt;&quot;)</code></pre>
+<p>We can then retrieve the data by downloading, unziping, and loading the data from <a href="https://github.com/mdavis3419/RepData_PeerAssessment1" title="my fork">my fork</a> of the <a href="https://github.com/rdpeng/RepData_PeerAssessment1" title="master GitHub repository">master GitHub repository</a> using the following function.</p>
+<pre class="r"><code>getdata &lt;- function(){
+  temp &lt;- tempfile()
+  url &lt;- &quot;https://github.com/mdavis3419/RepData_PeerAssessment1/blob/master/activity.zip?raw=true&quot;
+  download.file(url, temp, mode=&quot;wb&quot;)
+  unzip(temp, &quot;activity.csv&quot;)
+  read.table(&quot;activity.csv&quot;, sep=&quot;,&quot;, header=T)
+  }</code></pre>
+<p>And we can assign the data to the variable CompleteActivityLog so that we can continue to work with the full dataset.</p>
+<pre class="r"><code>  CompleteActivityLog &lt;- getdata()</code></pre>
+<p>If we take a look at the first few rows of the data we can see that there are null values in the form of “NA”, and that we have 3 fields “steps”, “date”, and “interval”.</p>
+<pre class="r"><code>  head(CompleteActivityLog)</code></pre>
+<pre><code>##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25</code></pre>
+<p>There are two things we should do before we get started. First We are going to find out what the data types of each of the fields are.</p>
+<pre class="r"><code>  sapply(CompleteActivityLog, class)</code></pre>
+<pre><code>##     steps      date  interval 
+## &quot;integer&quot;  &quot;factor&quot; &quot;integer&quot;</code></pre>
+<p>And next we are going to create a second dataset, which we will call nonNullActivityLog. Which only contains the values of the activity log that have non-null values in the steps column.</p>
+<pre class="r"><code>  nonNullActivityLog &lt;- CompleteActivityLog[!is.na(CompleteActivityLog),]</code></pre>
+<hr />
+<p>Now that we have all of our basic information, let’s look at the first problem to solve.</p>
+<div id="what-is-mean-total-number-of-steps-taken-per-day" class="section level3">
+<h3>What is mean total number of steps taken per day?</h3>
 </div>
-<div id="this-is-a-header" class="section level1">
-<h1>This is a header</h1>
-<div id="this-is-a-subheader" class="section level2">
-<h2>This is a subheader</h2>
-<div id="this-is-a-sub-subheader" class="section level3">
-<h3>This is a sub-subheader</h3>
-<p>This is text</p>
-<pre class="r"><code>4*4</code></pre>
-<pre><code>## [1] 16</code></pre>
-</div>
+<div id="section" class="section level2">
+<h2></h2>
 </div>
 </div>
 

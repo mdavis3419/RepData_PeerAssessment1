@@ -1,10 +1,66 @@
-Test  
-==========================================  
-# This is a header  
-## This is a subheader  
-### This is a sub-subheader  
-This is text
+Reproducible Research  
+=============================
+*******************
+Project1  
+11/14/2015  
+mdavis3419  
+
+*****************
+  
+We are going to be examining what the walking pattern of an individual was over the course of October and November in 2012. We have data in 5 minute intervals recording the number of steps taken durring that period of time.
+
+In order to work with this data we can move to the folder we want to work in.
+
+```{r echo=FALSE}
+setwd("C:\\Users\\Michael\\Documents\\GitHub\\Coursera\\Reproducable Research\\RepData_PeerAssessment1")
+```
+```
+setwd("<your desired directory>")
+```  
+
+We can then retrieve the data by downloading, unziping, and loading the data from [my fork][1] of the [master GitHub repository][2] using the following function.
 
 ```{r}
-4*4
+getdata <- function(){
+  temp <- tempfile()
+  url <- "https://github.com/mdavis3419/RepData_PeerAssessment1/blob/master/activity.zip?raw=true"
+  download.file(url, temp, mode="wb")
+  unzip(temp, "activity.csv")
+  read.table("activity.csv", sep=",", header=T)
+  }
 ```
+
+And we can assign the data to the variable CompleteActivityLog so that we can continue to work with the full dataset.
+
+```{r}
+  CompleteActivityLog <- getdata()
+```
+
+If we take a look at the first few rows of the data we can see that there are null values in the form of "NA", and that we have 3 fields "steps", "date", and "interval".
+
+```{r}
+  head(CompleteActivityLog)
+```
+
+There are two things we should do before we get started. First We are going to find out what the data types of each of the fields are.
+
+```{r}
+  sapply(CompleteActivityLog, class)
+```
+
+And next we are going to create a second dataset, which we will call nonNullActivityLog. Which only contains the values of the activity log that have non-null values in the steps column.
+
+```{r}
+  nonNullActivityLog <- CompleteActivityLog[!is.na(CompleteActivityLog),]
+```
+
+**************************
+
+Now that we have all of our basic information, let's look at the first problem to solve.
+
+### What is mean total number of steps taken per day?
+
+
+## 
+[1]: https://github.com/mdavis3419/RepData_PeerAssessment1 "my fork"
+[2]: https://github.com/rdpeng/RepData_PeerAssessment1 "master GitHub repository"
