@@ -17,6 +17,7 @@ setwd("C:\\Users\\Michael\\Documents\\GitHub\\Coursera\\Reproducable Research\\R
 ```
 setwd("<your desired directory>")
 ```  
+### Loading and preprocessing the data
 
 We can then retrieve the data by downloading, unziping, and loading the data from [my fork][1] of the [master GitHub repository][2] using the following function.
 
@@ -120,8 +121,59 @@ This tells us that the highest average step count occurs at `r peakWalkingTime()
 
 ### Imputing missing values
 
+Since there were missing values in the data we are going to perform some analysis about, and with placeholders for, the missing values.
 
+We will start by looking for the total number of null values.
+```{r}
+  TotalNAs <- length(CompleteActivityLog$steps[is.na(CompleteActivityLog$steps)])
+```
   
+Which means that there are `r TotalNAs` null records.  
+
+The most likely reason for these null records is that the person had taken off their tracking device. This could have happened for any number of reasons ranging from the subject taking a shower to wanting to look professional in a job interview. Since this is the simplistic reasoning that we are choosing to pursue, we are going to use the mean steps taken for that 5 minute interval (excluding the NAs) as a standin for the null values.  
+
+In order to do this we are going to use the following function to create a NullReplacedActivityLog dataset.
+
+```{r}
+  NullReplacement <- function(){
+    meanStepsThroughoutDayDF <- data.frame(as.numeric(names(meanStepsThroughoutDay)), meanStepsThroughoutDay)
+    names(meanStepsThroughoutDayDF) <- c("interval", "steps")
+    NullReplacedActivityLog <- merge(CompleteActivityLog, meanStepsThroughoutDayDF, by="interval")
+    NullReplacedActivityLog$steps.x <- with(NullReplacedActivityLog, ifelse(is.na(steps.x),steps.y,steps.x))
+    NullReplacedActivityLog <- NullReplacedActivityLog[,c(2,3,1)]
+    names(NullReplacedActivityLog) <- names(CompleteActivityLog)
+    NullReplacedActivityLog
+  }
+  NullReplacedActivityLog <- NullReplacement()
+  head(NullReplacedActivityLog)
+```
+
+We can now create the same histogram that we did for the nonNullActivity dataset using this null replaced data.
+```{r}
+    stepsPerDayEstimated <- tapply(NullReplacedActivityLog$steps, NullReplacedActivityLog$date, sum)
+    histOfStepsPerDayEstimated <- hist(stepsPerDayEstimated, main="Histogram of Total Estimated Steps Per Day", xlab="2000 Step Buckets", ylab ="Frequency", breaks=buckets)
+  meanEstimatedStepsPerDayExcludeNulls <- mean(stepsPerDayEstimated,na.rm = TRUE)
+  meanEstimatedStepsPerDayExcludeNulls
+  medianEstimatedStepsPerDayExcludeNulls <- median(stepsPerDayEstimated,na.rm = TRUE)
+  medianEstimatedStepsPerDayExcludeNulls
+```
+  
+As you can see, while the histogram maintains it's general shape, you can see that there are several days that have been added to the 10,000 - 11,999 step bucket. As is expected, the mean did not change (this would actually indicate that there was a problem with the process mathematically). The median has increased slightly to match the mean because of the addition of the mean number of steps for each of the missing time intervals.  
+### Are there differences in activity patterns between weekdays and weekends?
+
+It is expected that people have different activity patterns on weekdays and weekends due to work and school.  
+
+We can take the dataset that we just created, and with only a small modification look at how the behavior changes between these two categories. What we need to do is identify which days of the week each day is and then flag those that are weekend and weekday days respectively. Due to the nature of the plot we are going to use the lattice package.
+
+```{r}
+  library(lattice)
+  NullReplacedActivityLog$dayOfWeek <- weekdays(as.Date(NullReplacedActivityLog$date), abbreviate = TRUE)
+  NullReplacedActivityLog$DayType <- as.factor(with(NullReplacedActivityLog, ifelse(dayOfWeek == "Sat" | dayOfWeek == "Sun", "Weekend","Weekday")))
+  meanStepsThroughoutDayEstimated <- tapply(NullReplacedActivityLog$steps, NullReplacedActivityLog$interval ~ NullReplacedActivityLog$DayType, mean)
+  plot(strtoi(names(meanStepsThroughoutDayEstimated))/100,meanStepsThroughoutDayEstimated, type="l", main = "Average Steps Taken Durring 5 Minute Intervals", xlab="Time of Day (24h)",ylab="Steps (#)", xaxt="n" )
+axis(1,at=seq(0,24, by=6),las=2)
+```
+
 ## 
 [1]: https://github.com/mdavis3419/RepData_PeerAssessment1 "my fork"
 [2]: https://github.com/rdpeng/RepData_PeerAssessment1 "master GitHub repository"
