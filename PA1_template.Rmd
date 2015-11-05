@@ -78,9 +78,24 @@ We can now create a histogram to show us the distribution of steps per day. Whil
   
 ```{r}
   buckets <- c(0,2000,4000,6000,8000,10000,12000,14000,16000,18000,20000,22000)
-  histOfStepsPerDay <- hist(stepsPerDay, main="Histogram of Total Steps Per Day", xlab="2000 Step Buckets", ylab ="Frequency", breaks=buckets)
+  histOfStepsPerDay <- hist(stepsPerDay, main="Histogram of Total Steps Per Day", xlab="2000 Step Buckets", ylab ="Frequency", breaks=buckets, sub = "Figure 1")
 ```
 
+For the sake of this exercise we are going to save all of our images to a subfolder called "figures".  
+
+We will start by making sure that a figures folder exists in our current directory.
+
+```{r}
+  if(!dir.exists(".//figures")) {dir.create(".//figures")}
+```
+
+And then we will create a PNG of the graph.
+```{r results="hide"}
+  png(filename = ".//figures//figure1.png")
+  plot(histOfStepsPerDay)
+  dev.off()
+```
+  
 In addition to understanding the shape of this data, we should take a look at the mean and median of the data.
 
 ```{r}
@@ -103,10 +118,17 @@ We are going to look at the mean number of steps they took durring the individua
 
 Now we are going to plot these averages to see how activity changes throughout the day.
 ```{r}
-  plot(strtoi(names(meanStepsThroughoutDay))/100,meanStepsThroughoutDay, type="l", main = "Average Steps Taken Durring 5 Minute Intervals", xlab="Time of Day (24h)",ylab="Steps (#)", xaxt="n" )
+  plot(strtoi(names(meanStepsThroughoutDay))/100,meanStepsThroughoutDay, type="l", main = "Average Steps Taken Durring 5 Minute Intervals", xlab="Time of Day (24h)",ylab="Steps (#)", xaxt="n", sub = "Figure 2")
   axis(1,at=seq(0,24, by=6),las=2)
 ```
 
+Now we can save a copy of this image for future use.
+```{r results="hide"}
+  png(filename = ".//figures//figure2.png")
+  plot(strtoi(names(meanStepsThroughoutDay))/100,meanStepsThroughoutDay, type="l", main = "Average Steps Taken Durring 5 Minute Intervals", xlab="Time of Day (24h)",ylab="Steps (#)", xaxt="n", sub = "Figure 2")
+  axis(1,at=seq(0,24, by=6),las=2)
+  dev.off()
+```
 We can see that some time between 8 and 9 AM there is a spike in the average number of steps taken. In order to find out exactly what time this is we can sort all of times throughtout the day from highest average step count to lowest, and take the first value.  
 
 ```{r}
@@ -151,29 +173,51 @@ In order to do this we are going to use the following function to create a NullR
 We can now create the same histogram that we did for the nonNullActivity dataset using this null replaced data.
 ```{r}
     stepsPerDayEstimated <- tapply(NullReplacedActivityLog$steps, NullReplacedActivityLog$date, sum)
-    histOfStepsPerDayEstimated <- hist(stepsPerDayEstimated, main="Histogram of Total Estimated Steps Per Day", xlab="2000 Step Buckets", ylab ="Frequency", breaks=buckets)
-  meanEstimatedStepsPerDayExcludeNulls <- mean(stepsPerDayEstimated,na.rm = TRUE)
+    histOfStepsPerDayEstimated <- hist(stepsPerDayEstimated, main="Histogram of Total Estimated Steps Per Day", xlab="2000 Step Buckets", ylab ="Frequency", breaks=buckets, sub = "Figure 3")
+```
+And to save this file.  
+```{r results="hide"}
+    png(filename = ".//figures//figure3.png")
+    plot(histOfStepsPerDayEstimated)
+    dev.off()
+```
+We can also see that the mean and median are:
+```{r}
+meanEstimatedStepsPerDayExcludeNulls <- mean(stepsPerDayEstimated,na.rm = TRUE)
   meanEstimatedStepsPerDayExcludeNulls
   medianEstimatedStepsPerDayExcludeNulls <- median(stepsPerDayEstimated,na.rm = TRUE)
   medianEstimatedStepsPerDayExcludeNulls
 ```
+
   
 As you can see, while the histogram maintains it's general shape, you can see that there are several days that have been added to the 10,000 - 11,999 step bucket. As is expected, the mean did not change (this would actually indicate that there was a problem with the process mathematically). The median has increased slightly to match the mean because of the addition of the mean number of steps for each of the missing time intervals.  
 ### Are there differences in activity patterns between weekdays and weekends?
 
 It is expected that people have different activity patterns on weekdays and weekends due to work and school.  
 
-We can take the dataset that we just created, and with only a small modification look at how the behavior changes between these two categories. What we need to do is identify which days of the week each day is and then flag those that are weekend and weekday days respectively. Due to the nature of the plot we are going to use the lattice package.
+We can take the dataset that we just created, to observe how the behavior changes between these two categories. What we will do is identify which days of the week each date indicates. Of those identify those that are weekend and weekday days respectively. Then set up a trellis plot to how the average trend throughout the day.
 
 ```{r}
   library(lattice)
   NullReplacedActivityLog$dayOfWeek <- weekdays(as.Date(NullReplacedActivityLog$date), abbreviate = TRUE)
   NullReplacedActivityLog$DayType <- as.factor(with(NullReplacedActivityLog, ifelse(dayOfWeek == "Sat" | dayOfWeek == "Sun", "Weekend","Weekday")))
-  meanStepsThroughoutDayEstimated <- tapply(NullReplacedActivityLog$steps, NullReplacedActivityLog$interval ~ NullReplacedActivityLog$DayType, mean)
-  plot(strtoi(names(meanStepsThroughoutDayEstimated))/100,meanStepsThroughoutDayEstimated, type="l", main = "Average Steps Taken Durring 5 Minute Intervals", xlab="Time of Day (24h)",ylab="Steps (#)", xaxt="n" )
-axis(1,at=seq(0,24, by=6),las=2)
+  meanStepsThroughoutDayEstimated <- tapply(NullReplacedActivityLog$steps, list(NullReplacedActivityLog$interval, NullReplacedActivityLog$DayType), FUN = mean)
+  weekdayMeanSteps <- data.frame(row.names(meanStepsThroughoutDayEstimated),meanStepsThroughoutDayEstimated[,1], rep("Weekday",length(meanStepsThroughoutDayEstimated[,1])))
+  weekendMeanSteps <- data.frame(row.names(meanStepsThroughoutDayEstimated),meanStepsThroughoutDayEstimated[,2], rep("Weekend",length(meanStepsThroughoutDayEstimated[,2])))
+  meanstepsThroughoutDayNames <- c("interval","steps","dayType")
+  names(weekdayMeanSteps) <- meanstepsThroughoutDayNames
+  names(weekendMeanSteps) <- meanstepsThroughoutDayNames
+  meanStepsThroughoutDayEstimated <- rbind(weekdayMeanSteps, weekendMeanSteps)
+  meanStepsThroughoutDayEstimated$interval <- as.numeric( as.character( meanStepsThroughoutDayEstimated$interval))
+  weekdayVsWeekend <- xyplot(steps ~ interval/100 | dayType, meanStepsThroughoutDayEstimated, type = "l", layout=c(1,2), xlab = "Time Durring Day (24h)", ylab = "Mean Steps In 5 Minute Interval", main = "Average Steps Taken Throughout Day", sub = "Figure 4")
 ```
-
+We can now create our final plot.
+```{r results="hide"}
+  png(filename = ".//figures//figure4.png")
+  weekdayVsWeekend
+  dev.off()
+```
+  
 ## 
 [1]: https://github.com/mdavis3419/RepData_PeerAssessment1 "my fork"
 [2]: https://github.com/rdpeng/RepData_PeerAssessment1 "master GitHub repository"
