@@ -213,6 +213,7 @@ We can take the dataset that we just created, to observe how the behavior change
 ```
 We can now create our final plot.
 ```{r results="hide"}
+  weekdayVsWeekend
   png(filename = ".//figures//figure4.png")
   weekdayVsWeekend
   dev.off()
